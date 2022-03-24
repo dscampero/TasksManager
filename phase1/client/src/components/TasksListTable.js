@@ -8,36 +8,26 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
 import Paper from "@mui/material/Paper";
-import { TablePagination, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import { esES } from "@material-ui/core/locale";
 import axios from "axios";
+import TasksEditInput from "./TasksEditInput";
 
-function createData(taskName) {
-  return { taskName };
-}
-
-const theme = createMuiTheme(esES);
-
-const rows = [
-  createData("Buy groceries", "Shopping"),
-  createData("Prepare weekly report", "Work"),
-  createData("Write the candidates", "Work"),
-  createData("Do laundry", "Home"),
-  createData("Go to gym", "Personal"),
-  createData("Buy groceries", "Shopping"),
-  createData("Prepare weekly report", "Work"),
-  createData("Write the candidates", "Work"),
-  createData("Dssss", "Home"),
-  createData("Go to gym", "Personal"),
-];
 
 class TasksListTable extends React.Component {
   state = {
     taskList: [],
+    checked: false,
+    completed: 0,
+    show: false,
+    idnumber: 0,
   };
+
+  showEditField = (taskId) => {
+    this.setState({ show: true, idnumber: taskId });
+  };
+
   componentDidMount() {
     this.getTasksList();
   }
@@ -57,23 +47,24 @@ class TasksListTable extends React.Component {
     axios.delete(`http://localhost:4000/deleteTask/${taskId}`);
     this.getTasksList();
   };
-  // const [page, setPage] = React.useState(0);
-  // const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  // const handleChangePage = (event, newPage) => {
-  //   setPage(newPage);
-  // };
+  onCompleteClick = (taskId) => {
+    // axios.put(`http://localhost:4000/completeTask/${taskId}`);
+    // this.setState(this.setState({...this.state, completed: 1}));
+    // this.getTasksList();
+  };
 
-  // const handleChangeRowsPerPage = (event) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
-
-  // const emptyRows =
-  //   rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
   render() {
     return (
       <>
+        {this.state.show && (
+          <TasksEditInput
+            taskId={this.state.idnumber}
+            estado={this.state}
+            taskList={this.getTasksList()}
+          />
+        )}
+
         <TableContainer
           component={Paper}
           style={{
@@ -81,6 +72,7 @@ class TasksListTable extends React.Component {
             width: "80%",
             marginLeft: "auto",
             marginRight: "auto",
+            marginTop: "2%",
             marginBottom: "10%",
           }}
         >
@@ -101,56 +93,40 @@ class TasksListTable extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.taskList
-                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((task) => (
-                  <TableRow
-                    // key={task.taskName}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      <Checkbox />
-                      {/* {task.taskStatus} */}
-                    </TableCell>
-                    <TableCell align="center">{task.taskName}</TableCell>
-                    <TableCell align="center">
-                      <div>
-                        <IconButton>
-                          <EditIcon
-                            fontSize="large"
-                            style={{ color: "#006816" }}
-                          />
-                        </IconButton>
-                        <IconButton>
-                          <DeleteIcon
-                            fontSize="large"
-                            style={{ color: "#006816" }}
-                            onClick={() => this.onDeleteClick(task.taskId)}
-                          />
-                        </IconButton>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {/* {emptyRows > 0 && ( */}
+              {this.state.taskList.map((task) => (
+                <TableRow
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row">
+                    <Checkbox value={task.taskStatus} />
+                  </TableCell>
+                  <TableCell align="center">{task.taskName}</TableCell>
+                  <TableCell align="center">
+                    <div>
+                      <IconButton>
+                        <EditIcon
+                          fontSize="large"
+                          style={{ color: "#006816" }}
+                          onClick={() => this.showEditField(task.taskId)}
+                        />
+                      </IconButton>
+                      <IconButton>
+                        <DeleteIcon
+                          fontSize="large"
+                          style={{ color: "#006816" }}
+                          onClick={() => this.onDeleteClick(task.taskId)}
+                        />
+                      </IconButton>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
               <TableRow>
                 <TableCell colSpan={6} />
               </TableRow>
-              {/* )} */}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* <ThemeProvider theme={theme}>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </ThemeProvider> */}
       </>
     );
   }

@@ -4,6 +4,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import axios from 'axios'
 
 class tasksInputField extends React.Component {
+
   state = { taskName: ""}
 
   onSubmitClick = () => {
@@ -13,6 +14,7 @@ class tasksInputField extends React.Component {
   }
   
   render(){
+    console.log(this.state.task)
     return (
       <div>
       <TextField
