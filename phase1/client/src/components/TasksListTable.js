@@ -8,11 +8,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
 import Paper from "@mui/material/Paper";
-import { TablePagination } from "@mui/material";
+import { TablePagination, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { esES } from "@material-ui/core/locale";
+import axios from "axios";
 
 function createData(taskName) {
   return { taskName };
@@ -33,75 +34,113 @@ const rows = [
   createData("Go to gym", "Personal"),
 ];
 
-const TasksListTable = () => {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+class TasksListTable extends React.Component {
+  state = {
+    taskList: [],
+  };
+  componentDidMount() {
+    this.getTasksList();
+  }
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  componentDidUpdate() {
+    this.getTasksList();
+  }
+
+  getTasksList = () => {
+    axios
+      .get("http://localhost:4000/tasks")
+      .then((response) => response.data)
+      .then((response) => this.setState({ taskList: response }));
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  onDeleteClick = (taskId) => {
+    axios.delete(`http://localhost:4000/deleteTask/${taskId}`);
+    this.getTasksList();
   };
+  // const [page, setPage] = React.useState(0);
+  // const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  // const handleChangePage = (event, newPage) => {
+  //   setPage(newPage);
+  // };
 
-  return (
-    <>
-      <TableContainer
-        component={Paper}
-        style={{ boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.35)" }}
-      >
-        <Table sx={{ minWidth: 650 }}>
-          <TableHead style={{ backgroundColor: "#006816" }}>
-            <TableRow>
-              <TableCell style={{ color: "white" }}>Task name</TableCell>
-              <TableCell
-                className="boton"
-                style={{ color: "white" }}
-                align="center"
-              >
-                Is completed?
-              </TableCell>
-              <TableCell style={{ color: "white" }} align="center">
-                Options
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow
-                  key={row.taskName}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+  // const handleChangeRowsPerPage = (event) => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
+
+  // const emptyRows =
+  //   rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  render() {
+    return (
+      <>
+        <TableContainer
+          component={Paper}
+          style={{
+            boxShadow: "2px 2px 15px rgba(0, 0, 0, 0.35)",
+            width: "80%",
+            marginLeft: "auto",
+            marginRight: "auto",
+            marginBottom: "10%",
+          }}
+        >
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead style={{ backgroundColor: "#006816" }}>
+              <TableRow>
+                <TableCell style={{ color: "white" }}>Is completed?</TableCell>
+                <TableCell
+                  className="boton"
+                  style={{ color: "white" }}
+                  align="center"
                 >
-                  <TableCell component="th" scope="row">
-                    {row.taskName}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell align="center">
-                    <div style={{ color: "#006816" }}>
-                      <EditIcon fontSize="large" />
-                      <DeleteIcon fontSize="large" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
+                  Task Name
+                </TableCell>
+                <TableCell style={{ color: "white" }} align="center">
+                  Options
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.state.taskList
+                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((task) => (
+                  <TableRow
+                    // key={task.taskName}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      <Checkbox />
+                      {/* {task.taskStatus} */}
+                    </TableCell>
+                    <TableCell align="center">{task.taskName}</TableCell>
+                    <TableCell align="center">
+                      <div>
+                        <IconButton>
+                          <EditIcon
+                            fontSize="large"
+                            style={{ color: "#006816" }}
+                          />
+                        </IconButton>
+                        <IconButton>
+                          <DeleteIcon
+                            fontSize="large"
+                            style={{ color: "#006816" }}
+                            onClick={() => this.onDeleteClick(task.taskId)}
+                          />
+                        </IconButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {/* {emptyRows > 0 && ( */}
+              <TableRow>
                 <TableCell colSpan={6} />
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <ThemeProvider theme={theme}>
+              {/* )} */}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {/* <ThemeProvider theme={theme}>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -111,9 +150,10 @@ const TasksListTable = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </ThemeProvider>
-    </>
-  );
-};
+      </ThemeProvider> */}
+      </>
+    );
+  }
+}
 
 export default TasksListTable;

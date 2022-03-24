@@ -12,7 +12,7 @@ const TasksCardTitle = () => {
           fontWeight: "bold",
           marginLeft: "10px",
           marginBottom: "15px",
-          marginTop: "5px",
+          marginTop: "35px",
           color: "#313131",
           display: "inline-block",
         }}
