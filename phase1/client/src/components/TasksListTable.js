@@ -14,18 +14,25 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import TasksEditInput from "./TasksEditInput";
 
-
 class TasksListTable extends React.Component {
   state = {
     taskList: [],
-    checked: false,
-    completed: 0,
     show: false,
     idnumber: 0,
   };
 
   showEditField = (taskId) => {
     this.setState({ show: true, idnumber: taskId });
+  };
+
+  isChecked = (taskId) => {
+    const index = this.state.taskList.findIndex((id) => taskId === id.taskId);
+    let modTask = this.state.taskList;
+    modTask[index].taskStatus = !modTask[index].taskStatus;
+    this.setState({ ...this.state, taskList: modTask });
+    axios.put(`http://localhost:4000/completeTask/${taskId}`, {
+      completed: this.state.taskList[index].taskStatus,
+    });
   };
 
   componentDidMount() {
@@ -46,12 +53,6 @@ class TasksListTable extends React.Component {
   onDeleteClick = (taskId) => {
     axios.delete(`http://localhost:4000/deleteTask/${taskId}`);
     this.getTasksList();
-  };
-
-  onCompleteClick = (taskId) => {
-    // axios.put(`http://localhost:4000/completeTask/${taskId}`);
-    // this.setState(this.setState({...this.state, completed: 1}));
-    // this.getTasksList();
   };
 
   render() {
@@ -98,7 +99,11 @@ class TasksListTable extends React.Component {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
-                    <Checkbox value={task.taskStatus} />
+                    <Checkbox
+                      checked={task.taskStatus}
+                      onClick={() => this.isChecked(task.taskId)}
+                      style={{ color: "#006816" }}
+                    />
                   </TableCell>
                   <TableCell align="center">{task.taskName}</TableCell>
                   <TableCell align="center">

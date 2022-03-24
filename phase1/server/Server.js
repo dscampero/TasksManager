@@ -41,26 +41,25 @@ app.delete("/deleteTask/:taskId", (req, res) => {
   });
 });
 
-//to set checkbox
-// app.put("/completeTask/:taskId", (req, res) => {
-//     const CHECK_QUERY = `UPDATE tasksmanager.tasks SET taskStatus = ${req.params.taskStatus} WHERE (taskId=${req.params.taskId});`;
-//     connection.query(CHECK_QUERY, (err) => {
-//       if (err) {
-//         console.log(err);
-//       }
-//     });
-//   });
-
-  //to update a task
-  app.put("/updateTask/:taskId", (req, res) => {
-    console.log('holis: ', req.params)
-    const UPDATE_QUERY = `UPDATE tasksmanager.tasks SET taskName = '${req.body.newTaskName}' WHERE (taskId=${req.params.taskId});`;
-    connection.query(UPDATE_QUERY, (err) => {
-      if (err) {
-        console.log(err);
-      }
-    });
+// to set checkbox
+app.put("/completeTask/:taskId", (req, res) => {
+  const CHECK_QUERY = `UPDATE tasksmanager.tasks SET taskStatus = ${req.body.completed} WHERE (taskId=${req.params.taskId});`;
+  connection.query(CHECK_QUERY, (err) => {
+    if (err) {
+      console.log(err);
+    }
   });
+});
+
+//to update a task
+app.put("/updateTask/:taskId", (req, res) => {
+  const UPDATE_QUERY = `UPDATE tasksmanager.tasks SET taskName = '${req.body.newTaskName}' WHERE (taskId=${req.params.taskId});`;
+  connection.query(UPDATE_QUERY, (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+});
 
 app.listen(4000, () => {
   console.log("Server running on port 4000");
