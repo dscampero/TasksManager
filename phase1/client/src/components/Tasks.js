@@ -2,21 +2,22 @@ import React from "react";
 import TasksListTable from "./TasksListTable";
 import TasksInputField from "./TasksInputField";
 import TasksCardTitle from "./TasksCardTitle";
-import TasksEditInput from "./TasksEditInput"
+import TasksFolderTable from "./phase2/TasksFolderTable";
+import TasksFolderInputField from "./phase2/TasksFolderInputField";
+import TasksFolderCardTitle from "./phase2/TasksFolderCardTitle";
 
 class Tasks extends React.Component {
-
   render() {
     return (
       <div>
-      <TasksCardTitle />
-      <div style={{ marginBottom: "25px" }}>
-        <TasksInputField style={{ marginBottom: "25px" }} />
+        <TasksFolderCardTitle />
+        <div style={{ marginBottom: "25px" }}>
+          <TasksFolderInputField style={{ marginBottom: "25px" }} />
+          <TasksFolderTable />
+        </div>
       </div>
-      <TasksListTable/>
-    </div>
-  );
+    );
+  }
 }
-};
 
 export default Tasks;

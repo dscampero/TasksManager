@@ -21,7 +21,7 @@ app.get("/tasks", (req, res) => {
 
 //to add a task
 app.post("/newTask", (req, res) => {
-  const ADD_QUERY = `INSERT INTO tasksmanager.tasks (taskFolderId, taskName, taskStatus) values (1,'${req.body.taskName}',0)`;
+  const ADD_QUERY = `INSERT INTO tasksmanager.tasks (taskFolderId, taskName, taskStatus) values (${req.body.idFolderSelected},'${req.body.taskName}',0)`;
   connection.query(ADD_QUERY, (err) => {
     if (err) {
       console.log(err);
@@ -57,6 +57,43 @@ app.put("/updateTask/:taskId", (req, res) => {
   connection.query(UPDATE_QUERY, (err) => {
     if (err) {
       console.log(err);
+    }
+  });
+});
+
+
+/* ----- phase 2 --------*/
+
+//to create a task
+app.post("/newFolder", (req, res) => {
+  const ADD_QUERY = `INSERT INTO tasksmanager.folders (folderName) values ('${req.body.folderName}')`;
+  connection.query(ADD_QUERY, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send("folders has been created");
+    }
+  });
+});
+
+//to delete a folder
+app.delete("/deleteFolder/:folderId", (req, res) => {
+  const DELETE_QUERY = `DELETE FROM tasksmanager.folders WHERE (folderId=${req.params.folderId})`;
+  connection.query(DELETE_QUERY, (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+});
+
+//list all folders
+app.get("/folders", (req, res) => {
+  const FOLDER_QUERY = `SELECT * FROM tasksmanager.folders`;
+  connection.query(FOLDER_QUERY, (err, response) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(response);
     }
   });
 });

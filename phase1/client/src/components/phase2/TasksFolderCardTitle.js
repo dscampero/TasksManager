@@ -2,7 +2,7 @@ import React from "react";
 import { Typography } from "@mui/material";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 
-const TasksCardTitle = () => {
+const TasksFolderCardTitle = () => {
   return (
     <div>
       <ListAltIcon fontSize="large" style={{ color: "#006816" }} />
@@ -17,10 +17,10 @@ const TasksCardTitle = () => {
           display: "inline-block",
         }}
       >
-        Tasks List Table
+        Folders List Table
       </Typography>
     </div>
   );
 };
 
-export default TasksCardTitle;
+export default TasksFolderCardTitle;

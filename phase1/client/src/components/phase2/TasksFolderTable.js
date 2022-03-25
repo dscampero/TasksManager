@@ -6,43 +6,46 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Checkbox from "@mui/material/Checkbox";
 import Paper from "@mui/material/Paper";
 import { IconButton } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FolderIcon from "@mui/icons-material/Folder";
 import axios from "axios";
-import TasksEditInput from "./TasksEditInput";
-import TasksCardTitle from "./TasksCardTitle";
-import TasksInputField from "./TasksInputField";
+import TasksListTable from "../TasksListTable";
 
-class TasksListTable extends React.Component {
+class TasksFolderTable extends React.Component {
   state = {
+    folderList: [],
     taskList: [],
+    taskListFiltered: [],
     show: false,
     idnumber: 0,
+    idFolderSelected: 1
   };
 
-  showEditField = (taskId) => {
-    this.setState({ show: true, idnumber: taskId });
-  };
+  //   showEditField = (taskId) => {
+  //     this.setState({ show: true, idnumber: taskId });
+  //   };
 
-  isChecked = (taskId) => {
-    const index = this.state.taskList.findIndex((id) => taskId === id.taskId);
-    let modTask = this.state.taskList;
-    modTask[index].taskStatus = !modTask[index].taskStatus;
-    this.setState({ ...this.state, taskList: modTask });
-    axios.put(`http://localhost:4000/completeTask/${taskId}`, {
-      completed: this.state.taskList[index].taskStatus,
-    });
-  };
-
-  componentDidMount() {
+  onSubmitClick = (value) => {
+    axios.post("http://localhost:4000/newTask", {
+      taskName: value,
+      idFolderSelected: this.state.idFolderSelected
+    })
     this.getTasksList();
+    this.getFoldersList();
+    // this.renderFolderTasks(this.state.idFolderSelected);
+  }
+  componentDidMount() {
+    this.getTasksList()
+    this.getFoldersList();
+    // this.renderFolderTasks(this.state.idFolderSelected);
   }
 
   componentDidUpdate() {
-    this.getTasksList();
+    this.getTasksList()
+    this.getFoldersList();
+    // this.renderFolderTasks(this.state.idFolderSelected);
   }
 
   getTasksList = () => {
@@ -52,23 +55,38 @@ class TasksListTable extends React.Component {
       .then((response) => this.setState({ taskList: response }));
   };
 
-  onDeleteClick = (taskId) => {
-    axios.delete(`http://localhost:4000/deleteTask/${taskId}`);
-    this.getTasksList();
+
+  getFoldersList = () => {
+    axios
+      .get("http://localhost:4000/folders")
+      .then((response) => response.data)
+      .then((response) => this.setState({ folderList: response }));
+  };
+  
+
+  onDeleteClick = (folderId) => {
+    axios.delete(`http://localhost:4000/deleteFolder/${folderId}`);
+    this.getFoldersList();
   };
 
+  renderFolderTasks = (folderId) => {
+    console.log('arreglo: ',this.state.taskList)
+    const taskFound = this.state.taskList.filter(element => element.taskFolderId === folderId);
+      this.setState({...this.state, taskListFiltered: taskFound, idFolderSelected: folderId})
+      console.log('arregloF: ',this.state.taskListFiltered)
+  }
+
   render() {
+    
     return (
       <>
-      <TasksCardTitle />
-      <TasksInputField onClickAdd={(value) => {this.props.onClickAdd(value)}} style={{marginBottom: '25%'}}/>
-        {this.state.show && (
+        {/* {this.state.show && (
           <TasksEditInput
             taskId={this.state.idnumber}
             estado={this.state}
-            taskList={this.getTasksList()}
+            folderList={this.getFoldersList()}
           />
-        )}
+        )} */}
 
         <TableContainer
           component={Paper}
@@ -84,13 +102,12 @@ class TasksListTable extends React.Component {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead style={{ backgroundColor: "#006816" }}>
               <TableRow>
-                <TableCell style={{ color: "white" }}>Is completed?</TableCell>
                 <TableCell
                   className="boton"
                   style={{ color: "white" }}
-                  align="center"
+                  align="left"
                 >
-                  Task Name
+                  Folder Name
                 </TableCell>
                 <TableCell style={{ color: "white" }} align="center">
                   Options
@@ -98,32 +115,27 @@ class TasksListTable extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.props.taskLists.map((task) => (
+              {this.state.folderList.map((folder) => (
                 <TableRow
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell component="th" scope="row">
-                    <Checkbox
-                      checked={task.taskStatus}
-                      onClick={() => this.isChecked(task.taskId)}
-                      style={{ color: "#006816" }}
-                    />
+                  <TableCell align="left">
+                    <IconButton>
+                      <FolderIcon
+                        fontSize="large"
+                        style={{ color: "#006816", marginBottom: "5px" }}
+                        onClick={() => {this.renderFolderTasks(folder.folderId)}}
+                      />
+                    </IconButton>
+                    {folder.folderName}
                   </TableCell>
-                  <TableCell align="center">{task.taskName}</TableCell>
                   <TableCell align="center">
                     <div>
-                      <IconButton>
-                        <EditIcon
-                          fontSize="large"
-                          style={{ color: "#006816" }}
-                          onClick={() => this.showEditField(task.taskId)}
-                        />
-                      </IconButton>
                       <IconButton>
                         <DeleteIcon
                           fontSize="large"
                           style={{ color: "#006816" }}
-                          onClick={() => this.onDeleteClick(task.taskId)}
+                          onClick={() => this.onDeleteClick(folder.folderId)}
                         />
                       </IconButton>
                     </div>
@@ -136,9 +148,10 @@ class TasksListTable extends React.Component {
             </TableBody>
           </Table>
         </TableContainer>
+        <TasksListTable taskLists={this.state.taskListFiltered} onClickAdd={(value) => {this.onSubmitClick(value)}}/>
       </>
     );
   }
 }
 
-export default TasksListTable;
+export default TasksFolderTable;
